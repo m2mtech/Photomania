@@ -1,0 +1,8 @@
+To be able to run this app please set the FlickrAPIKey in FlickrAPIKey.h
+
+e.g.:
+
+#define FlickrAPIKey @"1234567890"
+
+A free FlickrAPIKey is available at
+   http://www.flickr.com/services/api/misc.api_keys.html
