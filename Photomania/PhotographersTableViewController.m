@@ -10,14 +10,55 @@
 #import "FlickrFetcher.h"
 #import "Photographer.h"
 #import "Photo+Flickr.h"
+#import "DocumentTableViewController.h"
 
-@interface PhotographersTableViewController ()
+@interface PhotographersTableViewController () <DocumentTableViewControllerSegue>
 
 @end
 
 @implementation PhotographersTableViewController
 
 @synthesize photoDatabase = _photoDatabase;
+
+- (void)setDocument:(UIManagedDocument *)document
+{
+    self.photoDatabase = document;
+}
+
+- (UIManagedDocument *)document
+{
+    return self.photoDatabase;
+}
+
+- (void)startSpinner:(NSString *)activity
+{
+    self.navigationItem.title = activity;
+    UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [spinner startAnimating];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
+}
+
+- (void)stopSpinner
+{
+    self.navigationItem.rightBarButtonItem = nil;
+    self.navigationItem.title = self.title;
+}
+
+- (void)save
+{
+    [self.photoDatabase saveToURL:self.photoDatabase.fileURL 
+                 forSaveOperation:UIDocumentSaveForOverwriting 
+                completionHandler:^(BOOL success) {
+                    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Photographer"];
+                    int photographercount = [self.photoDatabase.managedObjectContext countForFetchRequest:request 
+                                                                                                    error:NULL];
+                    NSString *documentNote = [NSString stringWithFormat:@"%d photographers", photographercount];
+                    NSString *documentNoteKey = [self.photoDatabase.fileURL lastPathComponent];
+                    [[NSUbiquitousKeyValueStore defaultStore] setObject:documentNote 
+                                                                 forKey:documentNoteKey];
+                    [[NSUbiquitousKeyValueStore defaultStore] synchronize];
+    }];
+}
 
 - (void)setupFetchedResultsController
 {
@@ -35,6 +76,7 @@
 
 - (void)fetchFlickrDataIntoDocument:(UIManagedDocument *)document
 {
+    [self startSpinner:@"Flickr ..."];
     dispatch_queue_t queue = dispatch_queue_create("Flickr Fetcher Queue", NULL);
     dispatch_async(queue, ^{
         NSArray *photos = [FlickrFetcher recentGeoreferencedPhotos];
@@ -43,7 +85,7 @@
                 [Photo photoWithFlickrInfo:flickrInfo 
                     inManagedObjectContext:document.managedObjectContext];
             }
-            [document saveToURL:document.fileURL forSaveOperation:UIDocumentSaveForOverwriting completionHandler:NULL];
+         [self save];
         }];        
     });
     dispatch_release(queue);
@@ -67,10 +109,56 @@
     }
 }
 
+- (void)documentChanged:(NSNotification *)notification
+{
+    [self.photoDatabase.managedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+}
+
+- (void)documentStateChanged:(NSNotification *)notification
+{
+    if (self.photoDatabase.documentState & UIDocumentStateInConflict) {
+        // look at the changes in notification's userInfo and resolve conflicts
+        //   or just take the latest version (by doing nothing)
+        // in any case (even if you do nothing and take latest version),
+        //   mark all old versions resolved ...
+        NSArray *conflictingVersions = [NSFileVersion unresolvedConflictVersionsOfItemAtURL:self.photoDatabase.fileURL];
+        for (NSFileVersion *version in conflictingVersions) {
+            version.resolved = YES;
+        }
+        // ... and remove the old version files in a separate thread
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+            NSError *error;
+            [coordinator coordinateWritingItemAtURL:self.photoDatabase.fileURL options:NSFileCoordinatorWritingForDeleting error:&error byAccessor:^(NSURL *newURL) {
+                [NSFileVersion removeOtherVersionsOfItemAtURL:self.photoDatabase.fileURL error:NULL];
+            }];
+            if (error) NSLog(@"[%@ %@] %@ (%@)", NSStringFromClass([self class]), NSStringFromSelector(_cmd), error.localizedDescription, error.localizedFailureReason);
+        });
+    } else if (self.photoDatabase.documentState & UIDocumentStateSavingError) {
+        // try again?
+        // notify user?
+    }
+}
+
 - (void)setPhotoDatabase:(UIManagedDocument *)photoDatabase
 {
     if (_photoDatabase == photoDatabase) return;
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:NSPersistentStoreDidImportUbiquitousContentChangesNotification 
+                                                  object:_photoDatabase.managedObjectContext.persistentStoreCoordinator];
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:UIDocumentStateChangedNotification 
+                                                  object:_photoDatabase];
     _photoDatabase = photoDatabase;
+    [self startSpinner:@"iCloud ..."];
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(documentChanged:) 
+                                                 name:NSPersistentStoreDidImportUbiquitousContentChangesNotification 
+                                               object:_photoDatabase.managedObjectContext.persistentStoreCoordinator];    
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(documentStateChanged:) 
+                                                 name:UIDocumentStateChangedNotification 
+                                               object:_photoDatabase];    
     [self useDocument];
 }
 
@@ -98,6 +186,11 @@
     }
 }
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self]; 
+}
+
 #pragma mark - Table view data source
 
 - (UITableViewCell *)tableView:(UITableView *)tableView 
@@ -108,11 +201,29 @@
     if (!cell) cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle 
                                              reuseIdentifier:CellIdentifier];
     
+    [self stopSpinner];
+    
     Photographer *photographer = [self.fetchedResultsController objectAtIndexPath:indexPath];
     cell.textLabel.text = photographer.name;
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%d photos", [photographer.photos count]];
     
     return cell;
+}
+
+-  (void)tableView:(UITableView *)tableView 
+commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
+ forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        if (!(self.photoDatabase.documentState & UIDocumentStateEditingDisabled)) {
+            Photographer *photographer = [self.fetchedResultsController objectAtIndexPath:indexPath];
+            [self.fetchedResultsController.managedObjectContext deleteObject:photographer];
+            [self save];
+        } else {
+            // notifiy user
+            // not allow us to get here
+        }
+    }
 }
 
 #pragma mark - Table view delegate

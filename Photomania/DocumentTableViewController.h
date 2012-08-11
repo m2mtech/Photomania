@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol DocumentTableViewControllerSegue <NSObject>
+
+@property (nonatomic, strong) UIManagedDocument *document;
+
+@end
+
 @interface DocumentTableViewController : UITableViewController
 
 @end

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5B5512F215D690E7000B34BF /* DocumentTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B5512F115D690E7000B34BF /* DocumentTableViewController.m */; };
+		5B5512FC15D6AFD3000B34BF /* AskerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B5512FB15D6AFD3000B34BF /* AskerViewController.m */; };
 		5B695EDE15C7FE8B003AEBDE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B695EDD15C7FE8B003AEBDE /* UIKit.framework */; };
 		5B695EE015C7FE8B003AEBDE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B695EDF15C7FE8B003AEBDE /* Foundation.framework */; };
 		5B695EE215C7FE8B003AEBDE /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B695EE115C7FE8B003AEBDE /* CoreGraphics.framework */; };
@@ -34,6 +35,9 @@
 		5B5512F015D690E7000B34BF /* DocumentTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocumentTableViewController.h; sourceTree = "<group>"; };
 		5B5512F115D690E7000B34BF /* DocumentTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocumentTableViewController.m; sourceTree = "<group>"; };
 		5B5512F415D69A62000B34BF /* Photomania.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Photomania.entitlements; sourceTree = "<group>"; };
+		5B5512F915D6ABE8000B34BF /* Photomania 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Photomania 2.xcdatamodel"; sourceTree = "<group>"; };
+		5B5512FA15D6AFD3000B34BF /* AskerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AskerViewController.h; sourceTree = "<group>"; };
+		5B5512FB15D6AFD3000B34BF /* AskerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AskerViewController.m; sourceTree = "<group>"; };
 		5B695ED915C7FE8B003AEBDE /* Photomania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Photomania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B695EDD15C7FE8B003AEBDE /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		5B695EDF15C7FE8B003AEBDE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -118,8 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				5B695F0D15C80039003AEBDE /* README */,
-				5B695EEC15C7FE8B003AEBDE /* AppDelegate.h */,
-				5B695EED15C7FE8B003AEBDE /* AppDelegate.m */,
 				5B695EEF15C7FE8C003AEBDE /* MainStoryboard.storyboard */,
 				5B5512F015D690E7000B34BF /* DocumentTableViewController.h */,
 				5B5512F115D690E7000B34BF /* DocumentTableViewController.m */,
@@ -147,6 +149,8 @@
 		5B695EE415C7FE8B003AEBDE /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5B695EEC15C7FE8B003AEBDE /* AppDelegate.h */,
+				5B695EED15C7FE8B003AEBDE /* AppDelegate.m */,
 				5B5512F415D69A62000B34BF /* Photomania.entitlements */,
 				5B695EE515C7FE8B003AEBDE /* Photomania-Info.plist */,
 				5B695EE615C7FE8B003AEBDE /* InfoPlist.strings */,
@@ -166,6 +170,8 @@
 				5B695F0715C7FFF0003AEBDE /* ImageViewController.m */,
 				5B695F0115C7FFF0003AEBDE /* CoreDataTableViewController.h */,
 				5B695F0215C7FFF0003AEBDE /* CoreDataTableViewController.m */,
+				5B5512FA15D6AFD3000B34BF /* AskerViewController.h */,
+				5B5512FB15D6AFD3000B34BF /* AskerViewController.m */,
 			);
 			name = "Provided Files";
 			sourceTree = "<group>";
@@ -248,6 +254,7 @@
 				5B695F2F15C80FAB003AEBDE /* Photo+Flickr.m in Sources */,
 				5B695F3215C81408003AEBDE /* Photographer+Create.m in Sources */,
 				5B5512F215D690E7000B34BF /* DocumentTableViewController.m in Sources */,
+				5B5512FC15D6AFD3000B34BF /* AskerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,6 +376,7 @@
 		5B695F1E15C80B0E003AEBDE /* Photomania.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				5B5512F915D6ABE8000B34BF /* Photomania 2.xcdatamodel */,
 				5B695F1F15C80B0E003AEBDE /* Photomania.xcdatamodel */,
 			);
 			currentVersion = 5B695F1F15C80B0E003AEBDE /* Photomania.xcdatamodel */;

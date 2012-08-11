@@ -6,3 +6,6 @@ e.g.:
 
 A free FlickrAPIKey is available at
    http://www.flickr.com/services/api/misc.api_keys.html
+
+
+In addition, you have to create a provisioning profile which allows to use the iCloude functionallity.
